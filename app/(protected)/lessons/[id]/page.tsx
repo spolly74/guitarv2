@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { ThreePaneLayout } from "@/components/layout"
 import { LessonWorkspace } from "@/components/lesson"
 import { ChatContainer } from "@/components/chat"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -107,12 +108,15 @@ export default function LessonPage() {
     <ThreePaneLayout
       leftPane={
         <div className="p-4">
-          <Link href="/lessons">
-            <Button variant="ghost" size="sm" className="mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/lessons">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
           <h2 className="font-semibold text-lg mb-2">{lesson.title}</h2>
           <p className="text-sm text-muted-foreground">
             Lesson workspace

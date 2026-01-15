@@ -4,6 +4,7 @@ import { Plus, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { LessonCard } from "@/components/lesson"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default async function LessonsPage() {
   const supabase = await createClient()
@@ -29,12 +30,15 @@ export default async function LessonsPage() {
               Your guitar practice lessons
             </p>
           </div>
-          <form action="/api/lessons" method="POST">
-            <Button type="submit">
-              <Plus className="h-4 w-4 mr-2" />
-              New Lesson
-            </Button>
-          </form>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <form action="/api/lessons" method="POST">
+              <Button type="submit">
+                <Plus className="h-4 w-4 mr-2" />
+                New Lesson
+              </Button>
+            </form>
+          </div>
         </div>
 
         {!lessons || lessons.length === 0 ? (

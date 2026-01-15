@@ -18,20 +18,26 @@ import {
 
 interface BlockWrapperProps {
   id: string
+  blockType: string
   isPinned: boolean
   onTogglePin: () => void
   onRequestDelete?: () => void
   children: React.ReactNode
 }
 
+// Block types that should display compactly (side by side)
+const compactBlockTypes = new Set(["ChordDiagram"])
+
 export function BlockWrapper({
   id,
+  blockType,
   isPinned,
   onTogglePin,
   onRequestDelete,
   children
 }: BlockWrapperProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const isCompact = compactBlockTypes.has(blockType)
 
   const {
     attributes,
@@ -55,7 +61,7 @@ export function BlockWrapper({
       style={style}
       className={`group relative rounded-lg border bg-card p-4 ${
         isPinned ? "border-primary ring-1 ring-primary/20" : "border-border"
-      } ${isDragging ? "shadow-lg" : ""}`}
+      } ${isDragging ? "shadow-lg" : ""} ${isCompact ? "w-fit" : "w-full"}`}
     >
       {/* Controls - visible on hover */}
       <div className="absolute -top-3 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

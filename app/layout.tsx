@@ -18,13 +18,31 @@ export const metadata: Metadata = {
   description: "AI-powered guitar lesson generator",
 };
 
+const themeScript = `
+(function() {
+  const theme = localStorage.getItem('theme') || 'system';
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else if (theme === 'light') {
+    root.classList.add('light');
+  } else {
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.classList.add(systemDark ? 'dark' : 'light');
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

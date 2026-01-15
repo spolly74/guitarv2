@@ -9,16 +9,12 @@ interface ChordDiagramBlockProps {
 
 export function ChordDiagramBlock({ block }: ChordDiagramBlockProps) {
   return (
-    <div className="flex justify-center">
-      <div className="w-60">
-        <DiagramErrorBoundary>
-          <ChordDiagram
-            data={block.data}
-            animate={block.animate}
-            showIntervals={block.showIntervals}
-          />
-        </DiagramErrorBoundary>
-      </div>
-    </div>
+    <DiagramErrorBoundary>
+      <ChordDiagram
+        data={block.data}
+        animate={block.animate}
+        showIntervals={block.showIntervals}
+      />
+    </DiagramErrorBoundary>
   )
 }

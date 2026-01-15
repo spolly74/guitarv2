@@ -14,7 +14,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy
+  rectSortingStrategy
 } from "@dnd-kit/sortable"
 import { UIPlanner } from "@/lib/planner"
 import type { LessonUIState, LessonBlock } from "@/lib/schemas"
@@ -143,13 +143,14 @@ export function LessonWorkspace({
           >
             <SortableContext
               items={state.layout.order}
-              strategy={verticalListSortingStrategy}
+              strategy={rectSortingStrategy}
             >
-              <div className="space-y-4">
+              <div className="flex flex-wrap gap-4">
                 {blocks.map((block) => (
                   <BlockWrapper
                     key={block.id}
                     id={block.id}
+                    blockType={block.type}
                     isPinned={planner.isBlockPinned(block.id)}
                     onTogglePin={() => handleTogglePin(block.id)}
                     onRequestDelete={() => handleRequestDelete(block.id)}
