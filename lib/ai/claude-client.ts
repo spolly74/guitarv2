@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
+import type { MessageParam, ContentBlockParam, ToolResultBlockParam } from "@anthropic-ai/sdk/resources/messages"
 import { TOOL_DEFINITIONS } from "./tool-definitions"
 import { SYSTEM_PROMPT } from "./system-prompt"
 import { handleToolCall, type ToolCall, type ToolCallResult } from "./tool-handlers"
@@ -25,73 +26,174 @@ export type StreamEvent =
 
 /**
  * Stream a chat response from Claude with tool use support
+ * Implements proper agentic loop: sends tool results back to Claude until completion
  */
 export async function* streamChatResponse(
   messages: ChatMessage[]
 ): AsyncGenerator<StreamEvent> {
   let fullResponse = ""
-  const pendingToolCalls: Map<number, { name: string; input: string }> = new Map()
+
+  // Convert chat messages to API format
+  const apiMessages: MessageParam[] = messages.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }))
 
   try {
-    const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      tools: TOOL_DEFINITIONS,
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    })
+    // Agentic loop - keep going until Claude stops using tools
+    let continueLoop = true
 
-    for await (const event of stream) {
-      if (event.type === "content_block_start") {
-        if (event.content_block.type === "tool_use") {
-          pendingToolCalls.set(event.index, {
-            name: event.content_block.name,
-            input: ""
-          })
-          yield { type: "tool_start", name: event.content_block.name }
-        }
-      } else if (event.type === "content_block_delta") {
-        if (event.delta.type === "text_delta") {
-          fullResponse += event.delta.text
-          yield { type: "text", content: event.delta.text }
-        } else if (event.delta.type === "input_json_delta") {
+    while (continueLoop) {
+      const pendingToolCalls: Map<number, { id: string; name: string; input: string }> = new Map()
+      const completedToolResults: { toolUseId: string; result: ToolCallResult }[] = []
+      let assistantContent: ContentBlockParam[] = []
+      let stopReason: string | null = null
+
+      console.log("[Claude Request] Messages:", apiMessages.length)
+
+      const stream = anthropic.messages.stream({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8192,
+        system: SYSTEM_PROMPT,
+        tools: TOOL_DEFINITIONS,
+        tool_choice: { type: "auto" },
+        messages: apiMessages,
+      })
+
+      for await (const event of stream) {
+        if (event.type === "content_block_start") {
+          if (event.content_block.type === "tool_use") {
+            console.log("[Tool Use Started]", event.content_block.name, "id:", event.content_block.id)
+            pendingToolCalls.set(event.index, {
+              id: event.content_block.id,
+              name: event.content_block.name,
+              input: ""
+            })
+            yield { type: "tool_start", name: event.content_block.name }
+          } else if (event.content_block.type === "text") {
+            // Text block starting
+          }
+        } else if (event.type === "content_block_delta") {
+          if (event.delta.type === "text_delta") {
+            fullResponse += event.delta.text
+            yield { type: "text", content: event.delta.text }
+          } else if (event.delta.type === "input_json_delta") {
+            const pending = pendingToolCalls.get(event.index)
+            if (pending) {
+              pending.input += event.delta.partial_json
+            }
+          }
+        } else if (event.type === "content_block_stop") {
           const pending = pendingToolCalls.get(event.index)
           if (pending) {
-            pending.input += event.delta.partial_json
-          }
-        }
-      } else if (event.type === "content_block_stop") {
-        const pending = pendingToolCalls.get(event.index)
-        if (pending) {
-          // Process the completed tool call
-          try {
-            const input = JSON.parse(pending.input)
-            const toolCall: ToolCall = {
-              id: `tool-${event.index}`,
-              name: pending.name,
-              input
-            }
-            const result = await handleToolCall(toolCall)
-            yield { type: "tool_result", result }
-          } catch (parseError) {
-            yield {
-              type: "tool_result",
-              result: {
-                success: false,
-                error: `Failed to parse tool input: ${parseError}`
+            console.log("[Tool Call Complete]", pending.name, "Input:", pending.input.substring(0, 200))
+
+            // Parse and execute the tool
+            try {
+              const input = JSON.parse(pending.input)
+              const toolCall: ToolCall = {
+                id: pending.id,
+                name: pending.name,
+                input
               }
+              const result = await handleToolCall(toolCall)
+              console.log("[Tool Result]", result.success, result.error || "")
+              yield { type: "tool_result", result }
+
+              // Store for sending back to Claude
+              completedToolResults.push({ toolUseId: pending.id, result })
+
+              // Add tool_use block to assistant content
+              assistantContent.push({
+                type: "tool_use",
+                id: pending.id,
+                name: pending.name,
+                input
+              })
+            } catch (parseError) {
+              console.error("[Tool Parse Error]", parseError)
+              yield {
+                type: "tool_result",
+                result: {
+                  success: false,
+                  error: `Failed to parse tool input: ${parseError}`
+                }
+              }
+              // Still need to send error result back to Claude
+              completedToolResults.push({
+                toolUseId: pending.id,
+                result: { success: false, error: `Parse error: ${parseError}` }
+              })
+              assistantContent.push({
+                type: "tool_use",
+                id: pending.id,
+                name: pending.name,
+                input: {}
+              })
             }
+            pendingToolCalls.delete(event.index)
           }
-          pendingToolCalls.delete(event.index)
+        } else if (event.type === "message_delta") {
+          stopReason = event.delta.stop_reason
+          console.log("[Message Delta] stop_reason:", stopReason)
+        } else if (event.type === "message_stop") {
+          console.log("[Message Complete] Tool calls executed:", completedToolResults.length)
         }
+      }
+
+      // Check if we need to continue the loop
+      if (completedToolResults.length > 0) {
+        console.log("[Agentic Loop] Sending", completedToolResults.length, "tool results back to Claude")
+
+        // Get the full final message to extract text content
+        const finalMessage = await stream.finalMessage()
+
+        // Build the assistant message with all content blocks
+        const assistantMessageContent: ContentBlockParam[] = []
+        for (const block of finalMessage.content) {
+          if (block.type === "text" && block.text) {
+            assistantMessageContent.push({ type: "text", text: block.text })
+          } else if (block.type === "tool_use") {
+            assistantMessageContent.push({
+              type: "tool_use",
+              id: block.id,
+              name: block.name,
+              input: block.input
+            })
+          }
+        }
+
+        // Add assistant message with tool uses
+        apiMessages.push({
+          role: "assistant",
+          content: assistantMessageContent
+        })
+
+        // Add user message with tool results
+        const toolResultBlocks: ToolResultBlockParam[] = completedToolResults.map(({ toolUseId, result }) => ({
+          type: "tool_result" as const,
+          tool_use_id: toolUseId,
+          content: result.success
+            ? JSON.stringify({ success: true, blockId: result.block?.id })
+            : JSON.stringify({ success: false, error: result.error })
+        }))
+
+        apiMessages.push({
+          role: "user",
+          content: toolResultBlocks
+        })
+
+        // Continue loop to let Claude respond to tool results
+        continueLoop = true
+      } else {
+        // No tool calls, we're done
+        continueLoop = false
       }
     }
 
     yield { type: "done", fullResponse }
   } catch (error) {
+    console.error("[Claude Error]", error)
     yield {
       type: "error",
       error: error instanceof Error ? error.message : "Unknown error"

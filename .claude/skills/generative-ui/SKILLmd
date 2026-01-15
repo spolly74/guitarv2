@@ -1,0 +1,86 @@
+---
+name: generative-ui-performance-optimizer
+description: Guides Claude to generate UI code optimized for performance, focusing on render efficiency, incremental updates, and avoiding common anti-patterns in dynamic/generative UI projects.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+---
+
+# Generative UI Performance Optimizer
+
+This Skill teaches Claude how to **produce UI code with performance best practices**, especially for **generative UI systems** like editors, dynamic layout engines, diagram renderers, and AI-driven interfaces.
+
+---
+
+## Instructions
+
+When responding to a request to write or improve UI code:
+
+### 1. Reason About Performance Upfront
+
+- Identify static vs dynamic data and state.
+- Distinguish between:
+  - **Render-bound work**
+  - **Computation-bound work**
+- Prefer **computing once outside renders**, not inside UI loops.
+
+---
+
+### 2. Rendering & UI Update Guidelines
+
+1. **Minimize re-renders.**
+   - Use memoization for expensive computations.
+   - Only update necessary components when data changes.
+
+2. **Avoid Large DOM Rebuilds.**
+   - Batched updates (e.g., virtual DOM diffing, lists with virtualization).
+   - Do not regenerate whole trees when minor state changes occur.
+
+3. **Prefer efficient visual updates.**
+   - Use transforms for animations (e.g., `transform` vs layout properties).
+   - Use `requestAnimationFrame` for imperceptible, smooth updates.
+
+4. **Stable keys, IDs, and component boundaries.**
+   - Guarantee predictable reconciliation.
+
+---
+
+### 3. Data Flow & State Management Principles
+
+- Separate:
+  - **Model state** (domain/conceptual)
+  - **View state** (hover/focus/viewport)
+  - **Transient state** (animations)
+- Avoid coupling AI generation directly to rendering loops.
+- Normalize AI results before UI consumption.
+
+---
+
+### 4. AI-Generated Content Constraints
+
+- Treat AI output as **data**, not executable render logic.
+- Always validate and sanitize AI responses before binding to UI state.
+- Cache expensive AI outputs and only regenerate when truly necessary.
+
+---
+
+## Examples
+
+### Example 1 — React (Memoization)
+
+**User request:** “Generate a React component for a live data chart that updates frequently.”
+
+**Expected pattern:**
+
+```tsx
+const Chart = memo(({ data }) => {
+  const processed = useMemo(() => computeLayout(data), [data]);
+  return (
+    <svg>
+      {processed.map(item => (
+        <Circle key={item.id} {...item} />
+      ))}
+    </svg>
+  );
+});

@@ -31,7 +31,12 @@ export async function handleToolCall(toolCall: ToolCall): Promise<ToolCallResult
 
   switch (toolCall.name) {
     case "create_chord_diagram": {
-      const parsed = ChordDiagramDataSchema.safeParse(toolCall.input)
+      // Add id if not provided by AI
+      const inputWithId = {
+        id: uuidv4(),
+        ...(toolCall.input as object)
+      }
+      const parsed = ChordDiagramDataSchema.safeParse(inputWithId)
 
       if (!parsed.success) {
         return {
@@ -54,7 +59,12 @@ export async function handleToolCall(toolCall: ToolCall): Promise<ToolCallResult
     }
 
     case "create_fretboard_diagram": {
-      const parsed = FretboardDiagramDataSchema.safeParse(toolCall.input)
+      // Add id if not provided by AI
+      const inputWithId = {
+        id: uuidv4(),
+        ...(toolCall.input as object)
+      }
+      const parsed = FretboardDiagramDataSchema.safeParse(inputWithId)
 
       if (!parsed.success) {
         return {

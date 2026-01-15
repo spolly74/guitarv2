@@ -86,8 +86,15 @@ export function useChat(lessonId: string): UseChatReturn {
                     : m
                 )
               )
-            } else if (parsed.type === "tool_result" && parsed.result?.success && parsed.result?.block) {
-              newBlocks.push(parsed.result.block)
+            } else if (parsed.type === "tool_result") {
+              if (parsed.result?.success && parsed.result?.block) {
+                newBlocks.push(parsed.result.block)
+              } else if (parsed.result?.error) {
+                console.error("Tool call failed:", parsed.result.error)
+                toast.error(`Diagram creation failed: ${parsed.result.error}`)
+              }
+            } else if (parsed.type === "tool_start") {
+              console.log("Tool started:", parsed.name)
             } else if (parsed.type === "error") {
               console.error("Chat error:", parsed.error)
               toast.error(parsed.error || "An error occurred")

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,8 @@ interface LessonWorkspaceProps {
   lessonId: string
   initialState: LessonUIState
   onStateChange?: (state: LessonUIState) => void
+  pendingBlocks?: LessonBlock[]
+  onBlocksProcessed?: () => void
 }
 
 interface PendingConfirmation {
@@ -45,7 +47,9 @@ interface PendingConfirmation {
 export function LessonWorkspace({
   lessonId,
   initialState,
-  onStateChange
+  onStateChange,
+  pendingBlocks,
+  onBlocksProcessed
 }: LessonWorkspaceProps) {
   const [planner] = useState(() => new UIPlanner(initialState))
   const [state, setState] = useState(planner.getState())
@@ -101,14 +105,21 @@ export function LessonWorkspace({
     setPendingConfirmation(null)
   }, [pendingConfirmation, planner, updateState])
 
-  // Public method to add a block from external sources (like AI)
-  const addBlock = useCallback((block: LessonBlock) => {
-    if (planner.addBlockDirect(block)) {
-      updateState()
-      return true
+  // Process pending blocks from AI when they arrive
+  useEffect(() => {
+    if (pendingBlocks && pendingBlocks.length > 0) {
+      let added = false
+      for (const block of pendingBlocks) {
+        if (planner.addBlockDirect(block)) {
+          added = true
+        }
+      }
+      if (added) {
+        updateState()
+      }
+      onBlocksProcessed?.()
     }
-    return false
-  }, [planner, updateState])
+  }, [pendingBlocks, planner, updateState, onBlocksProcessed])
 
   const blocks = planner.getBlocksInOrder()
 

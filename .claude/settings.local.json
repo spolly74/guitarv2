@@ -5,7 +5,9 @@
       "Bash(npm install:*)",
       "Bash(npx shadcn@latest init:*)",
       "Bash(pkill:*)",
-      "Bash(npx shadcn@latest add alert-dialog:*)"
+      "Bash(npx shadcn@latest add alert-dialog:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx shadcn@latest add dropdown-menu:*)"
     ]
   }
 }

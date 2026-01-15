@@ -32,16 +32,23 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  const body = await request.json().catch(() => ({}))
-  const title = body.title || "Untitled Lesson"
+  // Check if this is a form submission or API call
+  const contentType = request.headers.get("content-type") || ""
+  const isFormSubmission = !contentType.includes("application/json")
+
+  let title = "Untitled Lesson"
+  if (!isFormSubmission) {
+    const body = await request.json().catch(() => ({}))
+    title = body.title || "Untitled Lesson"
+  }
 
   const lessonId = uuidv4()
   const initialUIState = createEmptyLessonUIState(lessonId)
 
-  const { data: lesson, error } = await supabase
+  const { error } = await supabase
     .from("lessons")
     .insert({
       id: lessonId,
@@ -49,10 +56,11 @@ export async function POST(request: NextRequest) {
       title,
       ui_schema: initialUIState as Json
     })
-    .select()
-    .single()
 
   if (error) {
+    if (isFormSubmission) {
+      return NextResponse.redirect(new URL("/lessons?error=create_failed", request.url))
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -61,6 +69,18 @@ export async function POST(request: NextRequest) {
     lesson_id: lessonId,
     messages: []
   })
+
+  // Redirect to the new lesson for form submissions
+  if (isFormSubmission) {
+    return NextResponse.redirect(new URL(`/lessons/${lessonId}`, request.url))
+  }
+
+  // Return JSON for API calls
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select()
+    .eq("id", lessonId)
+    .single()
 
   return NextResponse.json(lesson, { status: 201 })
 }

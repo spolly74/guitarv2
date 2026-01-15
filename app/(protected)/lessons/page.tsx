@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { Plus, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
+import { LessonCard } from "@/components/lesson"
 
 export default async function LessonsPage() {
   const supabase = await createClient()
@@ -54,16 +54,12 @@ export default async function LessonsPage() {
         ) : (
           <div className="grid gap-4">
             {lessons.map((lesson) => (
-              <Link key={lesson.id} href={`/lessons/${lesson.id}`}>
-                <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                  <CardHeader>
-                    <CardTitle>{lesson.title}</CardTitle>
-                    <CardDescription>
-                      Last updated: {new Date(lesson.updated_at).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
+              <LessonCard
+                key={lesson.id}
+                id={lesson.id}
+                title={lesson.title}
+                updatedAt={lesson.updated_at}
+              />
             ))}
           </div>
         )}
