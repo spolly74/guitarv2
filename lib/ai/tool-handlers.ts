@@ -4,6 +4,10 @@ import {
   FretboardDiagramDataSchema,
   type LessonBlock
 } from "@/lib/schemas"
+import {
+  lookupVoicings,
+  getVoicing
+} from "@/lib/reference/chord-voicings"
 
 /**
  * Tool call from Claude
@@ -20,6 +24,7 @@ export interface ToolCall {
 export interface ToolCallResult {
   success: boolean
   block?: LessonBlock
+  data?: unknown
   error?: string
 }
 
@@ -30,6 +35,64 @@ export async function handleToolCall(toolCall: ToolCall): Promise<ToolCallResult
   const timestamp = new Date().toISOString()
 
   switch (toolCall.name) {
+    case "lookup_chord_voicing": {
+      const input = toolCall.input as {
+        root: string
+        quality: string
+        voicingIndex?: number
+      }
+
+      if (!input.root || !input.quality) {
+        return {
+          success: false,
+          error: "lookup_chord_voicing requires root and quality"
+        }
+      }
+
+      // If a specific voicing index is requested, return just that one
+      if (typeof input.voicingIndex === "number") {
+        const voicing = getVoicing(input.root, input.quality, input.voicingIndex)
+        if (!voicing) {
+          return {
+            success: false,
+            error: `No voicing at index ${input.voicingIndex} for ${input.root}${input.quality}`
+          }
+        }
+        return {
+          success: true,
+          data: {
+            voicing,
+            usage: "Use the positions, baseFret, and mutedStrings with create_chord_diagram."
+          }
+        }
+      }
+
+      // Otherwise return all matching voicings
+      const voicings = lookupVoicings(input.root, input.quality)
+      if (voicings.length === 0) {
+        return {
+          success: false,
+          error: `No voicings found for ${input.root} ${input.quality}. Try: maj, m, maj7, m7, 7`
+        }
+      }
+
+      // Add root and quality to each voicing for convenience
+      const voicingsWithMeta = voicings.map((v, index) => ({
+        index,
+        root: input.root,
+        quality: input.quality,
+        ...v
+      }))
+
+      return {
+        success: true,
+        data: {
+          voicings: voicingsWithMeta,
+          usage: "Use the positions, baseFret, and mutedStrings from any voicing with create_chord_diagram."
+        }
+      }
+    }
+
     case "create_chord_diagram": {
       // Add id if not provided by AI
       const inputWithId = {

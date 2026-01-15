@@ -8,7 +8,11 @@
       "Bash(npx shadcn@latest add alert-dialog:*)",
       "Bash(npm run build:*)",
       "Bash(npx shadcn@latest add dropdown-menu:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__plugin_serena_serena__get_symbols_overview",
+      "mcp__plugin_serena_serena__list_dir",
+      "Bash(npx tsx:*)",
+      "Bash(curl:*)"
     ]
   }
 }

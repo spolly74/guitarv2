@@ -7,6 +7,30 @@ import type { Tool } from "@anthropic-ai/sdk/resources/messages"
 
 export const TOOL_DEFINITIONS: Tool[] = [
   {
+    name: "lookup_chord_voicing",
+    description: "Look up reference chord voicings from the database. Use this BEFORE creating a chord diagram to get correct fret positions. Returns voicing data with positions, baseFret, and mutedStrings that can be used directly with create_chord_diagram.",
+    input_schema: {
+      type: "object" as const,
+      required: ["root", "quality"],
+      properties: {
+        root: {
+          type: "string",
+          enum: ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"],
+          description: "Root note of the chord"
+        },
+        quality: {
+          type: "string",
+          description: "Chord quality: 'maj' for major, 'm' for minor, 'maj7', 'm7', '7' for seventh chords"
+        },
+        voicingIndex: {
+          type: "integer",
+          minimum: 0,
+          description: "Optional: index of specific voicing to retrieve (0 = first/most common voicing)"
+        }
+      }
+    }
+  },
+  {
     name: "create_chord_diagram",
     description: "Create a single concrete guitar chord diagram (one voicing). Use for shell voicings, drop voicings, triads, and partial grips.",
     input_schema: {

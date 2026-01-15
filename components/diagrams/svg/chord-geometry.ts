@@ -23,10 +23,11 @@ export const CHORD_SVG = {
 
 /**
  * Calculate X coordinate for a string
- * String 1 = high E (leftmost), String 6 = low E (rightmost)
+ * String 6 = low E (leftmost), String 1 = high E (rightmost)
+ * This matches standard chord diagram orientation
  */
 export function stringX(stringNumber: number): number {
-  return CHORD_SVG.LEFT_MARGIN + (stringNumber - 1) * CHORD_SVG.STRING_SPACING
+  return CHORD_SVG.LEFT_MARGIN + (CHORD_SVG.STRINGS - stringNumber) * CHORD_SVG.STRING_SPACING
 }
 
 /**
