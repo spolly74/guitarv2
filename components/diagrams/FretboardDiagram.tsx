@@ -34,6 +34,8 @@ export function FretboardDiagram({
   return (
     <svg
       viewBox={`0 0 ${width} ${FRETBOARD_SVG.HEIGHT}`}
+      width="100%"
+      height="100%"
       className="fretboard-diagram"
       role="img"
       aria-label={data.label ?? `${data.root} fretboard diagram`}
@@ -152,6 +154,7 @@ export function FretboardDiagram({
         )
         const isRoot = highlightRoots && (note.isRoot || note.interval === "R")
         const radius = isRoot ? FRETBOARD_SVG.ROOT_RADIUS : FRETBOARD_SVG.NOTE_RADIUS
+        const noteColor = isRoot ? "hsl(0 72% 51%)" : "hsl(var(--primary))"
 
         return (
           <g
@@ -163,8 +166,8 @@ export function FretboardDiagram({
               cx={cx}
               cy={cy}
               r={radius}
-              fill="hsl(var(--primary))"
-              stroke="hsl(var(--primary))"
+              fill={noteColor}
+              stroke={noteColor}
             />
             <text
               x={cx}

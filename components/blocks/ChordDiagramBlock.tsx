@@ -9,12 +9,14 @@ interface ChordDiagramBlockProps {
 
 export function ChordDiagramBlock({ block }: ChordDiagramBlockProps) {
   return (
-    <DiagramErrorBoundary>
-      <ChordDiagram
-        data={block.data}
-        animate={block.animate}
-        showIntervals={block.showIntervals}
-      />
-    </DiagramErrorBoundary>
+    <div className="w-[180px] h-[240px]">
+      <DiagramErrorBoundary>
+        <ChordDiagram
+          data={block.data}
+          animate={block.animate}
+          showIntervals={block.showIntervals}
+        />
+      </DiagramErrorBoundary>
+    </div>
   )
 }

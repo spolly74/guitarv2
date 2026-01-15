@@ -30,6 +30,8 @@ export function ChordDiagram({
   return (
     <svg
       viewBox={`0 0 ${CHORD_SVG.WIDTH} ${CHORD_SVG.HEIGHT}`}
+      width="100%"
+      height="100%"
       className="chord-diagram"
       role="img"
       aria-label={`${data.root}${data.quality} chord diagram`}
@@ -144,6 +146,8 @@ export function ChordDiagram({
           const isRoot = pos.interval === "R"
           const radius = isRoot ? CHORD_SVG.ROOT_RADIUS : CHORD_SVG.NOTE_RADIUS
 
+          const noteColor = isRoot ? "hsl(0 72% 51%)" : "hsl(var(--primary))"
+
           return (
             <g
               key={`note-${i}`}
@@ -155,8 +159,8 @@ export function ChordDiagram({
                 cx={cx}
                 cy={cy}
                 r={radius}
-                fill="hsl(var(--primary))"
-                stroke="hsl(var(--primary))"
+                fill={noteColor}
+                stroke={noteColor}
               />
               {showIntervals && (
                 <text

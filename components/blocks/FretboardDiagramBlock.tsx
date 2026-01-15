@@ -9,7 +9,7 @@ interface FretboardDiagramBlockProps {
 
 export function FretboardDiagramBlock({ block }: FretboardDiagramBlockProps) {
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full h-[180px] overflow-x-auto">
       <DiagramErrorBoundary>
         <FretboardDiagram
           data={block.data}
