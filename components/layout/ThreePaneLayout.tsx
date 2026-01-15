@@ -22,54 +22,54 @@ export function ThreePaneLayout({
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Left Pane - Navigation */}
       <aside
-        className={`relative border-r border-border flex-shrink-0 transition-all duration-300 ${
-          leftCollapsed ? "w-0" : "w-64"
+        className={`relative bg-muted/30 flex-shrink-0 transition-all duration-300 ease-out ${
+          leftCollapsed ? "w-0" : "w-56 xl:w-64 2xl:w-72"
         }`}
       >
         {!leftCollapsed && (
-          <div className="h-full overflow-y-auto">
+          <div className="h-full overflow-y-auto border-r border-border/50">
             {leftPane}
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -right-4 top-4 z-10 h-8 w-8 rounded-full border bg-background shadow-sm"
+          className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border border-border/50 bg-background shadow-sm hover:bg-accent transition-colors"
           onClick={() => setLeftCollapsed(!leftCollapsed)}
         >
           {leftCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3" />
           )}
         </Button>
       </aside>
 
       {/* Center Pane - Lesson Workspace */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/20">
         {centerPane}
       </main>
 
       {/* Right Pane - Chat */}
       <aside
-        className={`relative border-l border-border flex-shrink-0 transition-all duration-300 ${
-          rightCollapsed ? "w-0" : "w-96"
+        className={`relative bg-muted/30 flex-shrink-0 transition-all duration-300 ease-out ${
+          rightCollapsed ? "w-0" : "w-80 xl:w-96 2xl:w-[420px]"
         }`}
       >
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -left-4 top-4 z-10 h-8 w-8 rounded-full border bg-background shadow-sm"
+          className="absolute -left-3 top-6 z-10 h-6 w-6 rounded-full border border-border/50 bg-background shadow-sm hover:bg-accent transition-colors"
           onClick={() => setRightCollapsed(!rightCollapsed)}
         >
           {rightCollapsed ? (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3" />
           ) : (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3" />
           )}
         </Button>
         {!rightCollapsed && (
-          <div className="h-full overflow-hidden">
+          <div className="h-full overflow-hidden border-l border-border/50">
             {rightPane}
           </div>
         )}

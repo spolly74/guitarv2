@@ -125,14 +125,24 @@ export function LessonWorkspace({
 
   return (
     <>
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Lesson Workspace</h1>
+      <div className="p-4 md:p-6 lg:p-8 xl:p-10 w-full">
+        <header className="mb-6 lg:mb-8">
+          <h1 className="text-xl lg:text-2xl font-semibold tracking-tight text-foreground/90">
+            Lesson Workspace
+          </h1>
+          <div className="mt-1 h-px bg-gradient-to-r from-border via-border/50 to-transparent max-w-xs" />
+        </header>
 
         {blocks.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p>No content yet.</p>
-            <p className="text-sm mt-2">
-              Start chatting with the AI to build your lesson.
+          <div className="flex flex-col items-center justify-center py-16 lg:py-24 text-muted-foreground">
+            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <p className="font-medium">No content yet</p>
+            <p className="text-sm mt-1 text-muted-foreground/70">
+              Start chatting with the AI to build your lesson
             </p>
           </div>
         ) : (
@@ -145,7 +155,7 @@ export function LessonWorkspace({
               items={state.layout.order}
               strategy={rectSortingStrategy}
             >
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 lg:gap-4 xl:gap-5">
                 {blocks.map((block) => (
                   <BlockWrapper
                     key={block.id}

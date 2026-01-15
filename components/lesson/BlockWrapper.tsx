@@ -59,9 +59,11 @@ export function BlockWrapper({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-lg border bg-card p-4 ${
-        isPinned ? "border-primary ring-1 ring-primary/20" : "border-border"
-      } ${isDragging ? "shadow-lg" : ""} ${isCompact ? "w-fit" : "w-full"}`}
+      className={`group relative rounded-xl border bg-card/80 backdrop-blur-sm p-4 lg:p-5 transition-all duration-200 ${
+        isPinned
+          ? "border-primary/50 ring-1 ring-primary/20 shadow-sm"
+          : "border-border/60 hover:border-border hover:shadow-sm"
+      } ${isDragging ? "shadow-xl scale-[1.02]" : ""} ${isCompact ? "w-fit" : "w-full"}`}
     >
       {/* Controls - visible on hover */}
       <div className="absolute -top-3 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
