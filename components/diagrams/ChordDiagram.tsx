@@ -42,7 +42,8 @@ export function ChordDiagram({
         x={CHORD_SVG.WIDTH / 2}
         y={20}
         textAnchor="middle"
-        className="fill-foreground text-sm font-medium"
+        style={{ fill: "hsl(var(--foreground))" }}
+        className="text-sm font-medium"
       >
         {data.metadata?.name ?? `${data.root}${data.quality}`}
       </text>
@@ -54,7 +55,7 @@ export function ChordDiagram({
           y1={bounds.top}
           x2={bounds.right}
           y2={bounds.top}
-          className="nut"
+          stroke="hsl(var(--foreground))"
           strokeWidth={CHORD_SVG.NUT_WIDTH}
         />
       )}
@@ -67,7 +68,7 @@ export function ChordDiagram({
           y1={fretY(i)}
           x2={bounds.right}
           y2={fretY(i)}
-          className="fret-line"
+          stroke="hsl(var(--foreground))"
           strokeWidth={CHORD_SVG.FRET_WIDTH}
         />
       ))}
@@ -80,7 +81,7 @@ export function ChordDiagram({
           y1={bounds.top}
           x2={stringX(i + 1)}
           y2={bounds.bottom}
-          className="string-line"
+          stroke="hsl(var(--muted-foreground))"
           strokeWidth={CHORD_SVG.STRING_WIDTH}
         />
       ))}
@@ -95,15 +96,11 @@ export function ChordDiagram({
               x={stringX(stringNum)}
               y={bounds.top - 10}
               textAnchor="middle"
-              className="muted-marker"
+              style={{ fill: "hsl(var(--muted-foreground))", fontSize: "12px" }}
             >
               ✕
             </text>
           )
-        }
-        // Open string marker (O above string) - only if not played and not muted
-        if (!playedStrings.has(stringNum) && !mutedStrings.has(stringNum)) {
-          return null // Unmarked strings are assumed to not be played
         }
         return null
       })}
@@ -117,7 +114,7 @@ export function ChordDiagram({
             x={stringX(pos.position.string)}
             y={bounds.top - 10}
             textAnchor="middle"
-            className="muted-marker"
+            style={{ fill: "hsl(var(--muted-foreground))", fontSize: "12px" }}
           >
             ○
           </text>
@@ -129,7 +126,7 @@ export function ChordDiagram({
           x={bounds.left - 15}
           y={fretY(0) + CHORD_SVG.FRET_SPACING / 2 + 4}
           textAnchor="middle"
-          className="base-fret-label"
+          style={{ fill: "hsl(var(--muted-foreground))", fontSize: "12px" }}
         >
           {baseFret}fr
         </text>
@@ -150,17 +147,23 @@ export function ChordDiagram({
           return (
             <g
               key={`note-${i}`}
-              className={`note ${isRoot ? "note--root" : ""} ${animate ? "note--animate" : ""}`}
+              className={animate ? "note--animate" : ""}
               data-interval={pos.interval}
               data-note={pos.note}
             >
-              <circle cx={cx} cy={cy} r={radius} />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={radius}
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--primary))"
+              />
               {showIntervals && (
                 <text
                   x={cx}
                   y={cy + 4}
                   textAnchor="middle"
-                  className="interval-label"
+                  style={{ fill: "hsl(var(--primary-foreground))", fontSize: "10px" }}
                 >
                   {pos.interval}
                 </text>

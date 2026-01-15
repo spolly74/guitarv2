@@ -47,7 +47,7 @@ export function FretboardDiagram({
           x={width / 2}
           y={12}
           textAnchor="middle"
-          className="fill-foreground text-xs font-medium"
+          style={{ fill: "hsl(var(--foreground))", fontSize: "12px", fontWeight: 500 }}
         >
           {data.label}
         </text>
@@ -60,7 +60,7 @@ export function FretboardDiagram({
           y1={bounds.top}
           x2={FRETBOARD_SVG.LEFT_MARGIN}
           y2={bounds.bottom}
-          className="nut"
+          stroke="hsl(var(--foreground))"
           strokeWidth={4}
         />
       )}
@@ -73,7 +73,7 @@ export function FretboardDiagram({
           y1={stringY(i + 1)}
           x2={bounds.right}
           y2={stringY(i + 1)}
-          className="string-line"
+          stroke="hsl(var(--muted-foreground))"
           strokeWidth={FRETBOARD_SVG.STRING_WIDTH}
         />
       ))}
@@ -86,7 +86,7 @@ export function FretboardDiagram({
           y1={bounds.top}
           x2={fretX(fret, fromFret) + FRETBOARD_SVG.FRET_SPACING / 2}
           y2={bounds.bottom}
-          className="fret-line"
+          stroke="hsl(var(--foreground))"
           strokeWidth={FRETBOARD_SVG.FRET_WIDTH}
         />
       ))}
@@ -105,13 +105,13 @@ export function FretboardDiagram({
                   cx={x}
                   cy={stringY(4.5)}
                   r={3}
-                  className="fill-muted-foreground/30"
+                  fill="hsl(var(--muted-foreground) / 0.3)"
                 />
                 <circle
                   cx={x}
                   cy={stringY(2.5)}
                   r={3}
-                  className="fill-muted-foreground/30"
+                  fill="hsl(var(--muted-foreground) / 0.3)"
                 />
               </g>
             )
@@ -123,7 +123,7 @@ export function FretboardDiagram({
               cx={x}
               cy={(bounds.top + bounds.bottom) / 2}
               r={3}
-              className="fill-muted-foreground/30"
+              fill="hsl(var(--muted-foreground) / 0.3)"
             />
           )
         })}
@@ -137,7 +137,7 @@ export function FretboardDiagram({
             x={fretX(fret, fromFret)}
             y={bounds.bottom + 15}
             textAnchor="middle"
-            className="fret-number"
+            style={{ fill: "hsl(var(--muted-foreground))", fontSize: "12px" }}
           >
             {fret}
           </text>
@@ -156,17 +156,21 @@ export function FretboardDiagram({
         return (
           <g
             key={`note-${i}`}
-            className={`note ${isRoot ? "note--root" : ""}`}
             data-interval={note.interval}
             data-note={note.note}
           >
-            <circle cx={cx} cy={cy} r={radius} />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={radius}
+              fill="hsl(var(--primary))"
+              stroke="hsl(var(--primary))"
+            />
             <text
               x={cx}
               y={cy + 3}
               textAnchor="middle"
-              className="interval-label"
-              style={{ fontSize: "8px" }}
+              style={{ fill: "hsl(var(--primary-foreground))", fontSize: "8px" }}
             >
               {note.interval}
             </text>
