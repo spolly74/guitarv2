@@ -1,5 +1,28 @@
 "use client"
 
+/**
+ * Chat Hook
+ *
+ * React hook that manages chat state and communication with the Claude AI backend.
+ * Handles streaming responses, tool results, and lesson block creation.
+ *
+ * @module hooks/useChat
+ *
+ * @example
+ * ```tsx
+ * function ChatComponent({ lessonId }: { lessonId: string }) {
+ *   const { messages, isStreaming, sendMessage, pendingBlocks } = useChat(lessonId)
+ *
+ *   return (
+ *     <div>
+ *       {messages.map(m => <Message key={m.id} {...m} />)}
+ *       <input onSubmit={e => sendMessage(e.target.value)} />
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
 import type { LessonBlock } from "@/lib/schemas"

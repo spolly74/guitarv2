@@ -1,3 +1,25 @@
+/**
+ * Claude AI Client
+ *
+ * Provides streaming chat functionality with Claude, including full support for
+ * tool use with an agentic loop pattern. The client handles the complete
+ * conversation flow including multiple rounds of tool calls.
+ *
+ * @module lib/ai/claude-client
+ *
+ * @example
+ * ```ts
+ * import { streamChatResponse } from "@/lib/ai/claude-client"
+ *
+ * const messages = [{ role: "user", content: "Show me a C major chord" }]
+ *
+ * for await (const event of streamChatResponse(messages)) {
+ *   if (event.type === "text") console.log(event.content)
+ *   if (event.type === "tool_result") handleBlock(event.result.block)
+ * }
+ * ```
+ */
+
 import Anthropic from "@anthropic-ai/sdk"
 import type { MessageParam, ContentBlockParam, ToolResultBlockParam } from "@anthropic-ai/sdk/resources/messages"
 import { TOOL_DEFINITIONS } from "./tool-definitions"

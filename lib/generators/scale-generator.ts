@@ -1,18 +1,30 @@
+/**
+ * Scale Generator
+ *
+ * Generates fretboard diagram data for various scale types.
+ * Used by the AI to create scale visualizations on the fretboard.
+ */
+
 import { v4 as uuidv4 } from "uuid"
 import type { NoteName, Interval } from "@/lib/schemas/primitives"
-import { CHROMATIC_NOTES, STANDARD_TUNING, INTERVAL_SEMITONES } from "@/lib/schemas/primitives"
 import type { FretboardDiagramData, FretboardNote } from "@/lib/schemas/diagram-data"
+import { getNoteAtPosition, getIntervalInScale } from "@/lib/music/note-utils"
 
-type ScaleType = "major" | "minor_pentatonic" | "major_pentatonic" | "blues"
+/** Supported scale types */
+export type ScaleType = "major" | "minor_pentatonic" | "major_pentatonic" | "blues"
 
-interface ScaleGeneratorInput {
+/** Input parameters for scale generation */
+export interface ScaleGeneratorInput {
+  /** Root note of the scale */
   root: NoteName
+  /** Type of scale to generate */
   scale: ScaleType
+  /** Fret range to display */
   range: { fromFret: number; toFret: number }
 }
 
 /**
- * Scale formulas as intervals
+ * Scale formulas defined as arrays of intervals
  */
 const SCALE_FORMULAS: Record<ScaleType, Interval[]> = {
   major: ["R", "2", "3", "4", "5", "6", "7"],
@@ -21,6 +33,9 @@ const SCALE_FORMULAS: Record<ScaleType, Interval[]> = {
   blues: ["R", "b3", "4", "#4", "5", "b7"]
 }
 
+/**
+ * Human-readable scale names for display
+ */
 const SCALE_LABELS: Record<ScaleType, string> = {
   major: "Major Scale",
   minor_pentatonic: "Minor Pentatonic",
@@ -29,55 +44,20 @@ const SCALE_LABELS: Record<ScaleType, string> = {
 }
 
 /**
- * Get the semitone value of a note
- */
-function getNoteIndex(note: NoteName): number {
-  // Handle enharmonic equivalents
-  const normalized: Record<string, number> = {
-    "C": 0, "C#": 1, "Db": 1,
-    "D": 2, "D#": 3, "Eb": 3,
-    "E": 4,
-    "F": 5, "F#": 6, "Gb": 6,
-    "G": 7, "G#": 8, "Ab": 8,
-    "A": 9, "A#": 10, "Bb": 10,
-    "B": 11
-  }
-  return normalized[note] ?? 0
-}
-
-/**
- * Get the note at a given fret on a given string
- */
-function getNoteAtPosition(stringNum: number, fret: number): NoteName {
-  const openNote = STANDARD_TUNING[stringNum - 1]
-  const openNoteIndex = getNoteIndex(openNote)
-  const noteIndex = (openNoteIndex + fret) % 12
-  return CHROMATIC_NOTES[noteIndex]
-}
-
-/**
- * Check if a note is in the scale
- */
-function getIntervalInScale(
-  note: NoteName,
-  root: NoteName,
-  scaleIntervals: Interval[]
-): Interval | null {
-  const rootIndex = getNoteIndex(root)
-  const noteIndex = getNoteIndex(note)
-  const semitones = (noteIndex - rootIndex + 12) % 12
-
-  // Find matching interval
-  for (const interval of scaleIntervals) {
-    if (INTERVAL_SEMITONES[interval] === semitones) {
-      return interval
-    }
-  }
-  return null
-}
-
-/**
- * Generate a FretboardDiagramData for a scale
+ * Generate fretboard diagram data for a scale
+ *
+ * Iterates through all positions in the specified fret range and
+ * identifies notes that belong to the requested scale.
+ *
+ * @param input - Scale generation parameters
+ * @returns FretboardDiagramData ready for rendering
+ *
+ * @example
+ * const scale = generateScale({
+ *   root: "A",
+ *   scale: "minor_pentatonic",
+ *   range: { fromFret: 5, toFret: 8 }
+ * })
  */
 export function generateScale(input: ScaleGeneratorInput): FretboardDiagramData {
   const { root, scale, range } = input
